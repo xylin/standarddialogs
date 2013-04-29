@@ -111,7 +111,7 @@ void Dialog::setSaveFileName()
     QString fileName = QFileDialog::getSaveFileName(this,
                                 tr("QFileDialog::getSaveFileName()"),
                                 saveFileNameLabel->text(),
-                                                    tr("All Files (*);CSV Files(*.csv);Text Files (*.txt)"),
+                                                    tr("CSV Files(*.csv);;Text Files (*.txt)"),
                                 &selectedFilter,
                                 options);
     if (!fileName.isEmpty())
@@ -138,11 +138,7 @@ void Dialog::setSaveFileName()
                                MESSAGE, 0, this);
             msgBox.addButton(tr("Save &Again"), QMessageBox::AcceptRole);
             msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
-
-
     }
-
-
 }
 
 
