@@ -42,6 +42,7 @@
 #include <iostream>
 #include <fstream>
 #include <QDir>
+
 #include "dialog.h"
 
 #define MESSAGE \
@@ -53,10 +54,9 @@
 Dialog::Dialog(QWidget *parent)
     : QWidget(parent)
 {
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("GB18030"));
 
+
+   errorMessageDialog_ =new QErrorMessage(this);
 
     int frameStyle = QFrame::Sunken | QFrame::Panel;
 
@@ -111,7 +111,7 @@ void Dialog::setSaveFileName()
     QString fileName = QFileDialog::getSaveFileName(this,
                                 tr("QFileDialog::getSaveFileName()"),
                                 saveFileNameLabel->text(),
-                                                    tr("CSV Files(*.csv);;Text Files (*.txt)"),
+                                                    tr("XLS Files(*.xls);;Text Files (*.txt)"),
                                 &selectedFilter,
                                 options);
     if (!fileName.isEmpty())
@@ -119,30 +119,30 @@ void Dialog::setSaveFileName()
 
     QDir dir(directoryLabel->text());
 
-    std::ofstream out(fileName.toStdString());
+    QFile file(fileName);
 
-    if(out.is_open())
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        out << "Folder Name,"<<"File Name," << "File Type,"<<"Modified Time,"<<"Created Time"<<std::endl;
+        errorMessageDialog_->showMessage(tr("Cant open output files. Please close the file first."));
+    }
+    else
+    {
+        QTextStream stream(&file);
+        stream.setCodec(QTextCodec::codecForName("UTF-8") );
 
-        listFiles(dir, out, "");
+        stream << tr("Folder Name\t") << tr("File Name\t") << tr("File Type\t") << tr("Modified Time\t") << tr("Created Time") << "\n";
 
-        out.close();
+        listFiles(dir, stream, "");
+
+        file.close();
 
         QMessageBox::StandardButton reply;
         reply = QMessageBox::information(this, tr("QMessageBox::information()"), "All Done!");
     }
-    else
-    {
-        QMessageBox msgBox(QMessageBox::Warning, tr("QMessageBox::warning()"),
-                               MESSAGE, 0, this);
-            msgBox.addButton(tr("Save &Again"), QMessageBox::AcceptRole);
-            msgBox.addButton(tr("&Continue"), QMessageBox::RejectRole);
-    }
 }
 
 
-void Dialog::listFiles(QDir directory, std::ofstream& out, QString indent)
+void Dialog::listFiles(QDir directory, QTextStream& out, QString indent)
 {
     indent += "\t";
 
@@ -160,12 +160,14 @@ void Dialog::listFiles(QDir directory, std::ofstream& out, QString indent)
 
     foreach(QFileInfo finfo, list)
     {
-        out << (finfo.absolutePath().toStdString()) << "," << finfo.fileName().toStdString() << ",";
-        out << finfo.suffix().toStdString() << "," << finfo.lastModified().toString().toStdString() << "," << finfo.created().toString().toStdString() << std::endl;
-
         if(finfo.isDir())
         {
             listFiles(QDir(finfo.absoluteFilePath()), out, indent);
+        }
+        else
+        {
+            out << finfo.absolutePath() << "\t" << finfo.fileName() << "\t";
+            out << finfo.suffix() << "\t" << finfo.lastModified().toString() << "\t" << finfo.created().toString() << "\n";
         }
     }
 }

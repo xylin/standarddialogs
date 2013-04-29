@@ -42,12 +42,18 @@
 #include <QTranslator>
 #include <QLocale>
 #include <QLibraryInfo>
-
+#include <QTextCodec>
 #include "dialog.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+
+    QTextCodec::setCodecForTr(codec);
+    QTextCodec::setCodecForCStrings(codec);
+    QTextCodec::setCodecForLocale(codec);//GB18030
 
     QString translatorFileName = QLatin1String("qt_");
     translatorFileName += QLocale::system().name();

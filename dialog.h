@@ -42,12 +42,13 @@
 #define DIALOG_H
 
 #include <QWidget>
-
+#include <QTextStream>
 QT_BEGIN_NAMESPACE
 class QCheckBox;
 class QLabel;
 class QErrorMessage;
 class QDir;
+
 QT_END_NAMESPACE
 
 class Dialog : public QWidget
@@ -57,7 +58,7 @@ class Dialog : public QWidget
 public:
     Dialog(QWidget *parent = 0);
 
-    void listFiles(QDir directory, std::ofstream& out, QString indent);
+    void listFiles(QDir directory, QTextStream& out, QString indent);
 
 private slots:  
     void setExistingDirectory();  
@@ -68,6 +69,7 @@ private:
 
     QLabel *directoryLabel;
     QLabel *saveFileNameLabel;
+    QErrorMessage *errorMessageDialog_;
 
 };
 
